@@ -22,9 +22,12 @@ pip3 install -f requirements.txt
 ## Usage
 If u have done everything rith, just type the following command to start the service. 
 ```bash
-python3 __main__.py
+python3 __main__.py -c channelName -i valueInterval
 ```
-
+Example to collect data from gaules channel on interval of 30 seconds
+```bash
+python3 __main__.py -c gaules -i 30
+```
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 

@@ -1,7 +1,7 @@
 from selenium import webdriver
 from time import sleep
 from datetime import datetime
-import json, requests, os
+import json, requests, os, argparse
 
 class start():
     def __init__(self,CHANNEL:str,PATH:str):
@@ -88,13 +88,19 @@ class telegram():
         response = requests.get(send_text)
         return response.json()['ok']
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--channel", "-c", help="Channel name  that you want to monitor the store! default:gaules", default='gaules',type=str)
+parser.add_argument("--interval", "-i", help="Interval of check time (in seconds, integer)! default: 30", default=30, type=int)
+args = parser.parse_args()
+
 if __name__ == "__main__":
+    print(f"Starting to collect data from {args.channel} channel, in {args.interval} of interval!")
     PATH = os.path.dirname(os.path.realpath(__file__))
     conf = json.load(open(PATH+'/telegram.json'))
-    x = start(conf['env']['STREAMELEMENTS_CHANNEL'], PATH)
+    x = start(args.channel, PATH)
     x.abre_a_page()
     while True:
         x.atualiza_a_page()
         x.parse_a_page()
         x.pegar_novos_itens()
-        x.sleep(conf['env']['Interval'])
+        x.sleep(args.interval)
