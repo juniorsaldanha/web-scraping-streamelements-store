@@ -1,0 +1,10 @@
+{
+    "telegram":{
+        "token" : "token of your Bot, if u doesnt have a bot in telegra, create one",
+        "chat_id" : "get chat id, search in Google to see how to do it"
+    },
+    "env":{
+        "STREAMELEMENTS_CHANNEL":"channel name in streamelements",
+        "Interval":60
+    }
+}
