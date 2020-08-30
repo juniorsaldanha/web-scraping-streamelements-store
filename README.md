@@ -22,11 +22,11 @@ pip3 install -f requirements.txt
 ## Usage
 If u have done everything rith, just type the following command to start the service. 
 ```bash
-python3 __main__.py -c channelName -i valueInterval
+python3 main.py -c channelName -i valueInterval -t typeOfProductToAlert
 ```
-Example to collect data from gaules channel on interval of 30 seconds
+Example to collect data from gaules channel on interval of 30 seconds and alerting only skins on telegram.
 ```bash
-python3 __main__.py -c gaules -i 30
+python3 main.py -c gaules -i 30 -t skins
 ```
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
