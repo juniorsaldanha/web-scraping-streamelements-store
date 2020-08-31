@@ -9,7 +9,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install libs/re
 ```bash
 
 git clone https://github.com/juniorsaldanha/web-scraping-streamelements-store
-cd web-scraping-gaules-store
+cd web-scraping-streamelements-store
 pip3 install -f requirements.txt
 ```
 ## Rename or Copy telegram_model.json to telegram.json and set tha variables
