@@ -5,7 +5,7 @@ from requests_html import HTMLSession
 from time import sleep
 import json, os, argparse, requests, sys
 
-#Args 
+#Args
 parser = argparse.ArgumentParser()
 parser.add_argument("--channel", "-c", help="Channel name  that you want to monitor the store! default:gaules", default='gaules',type=str)
 parser.add_argument("--interval", "-i", help="Interval of check time (in seconds, integer)! default: 30", default=30, type=int)
@@ -21,7 +21,7 @@ class telegram():
             sys.exit(1)
         self.bot_token = self.telegramConf['telegram']['token']
         self.chat_id = self.telegramConf['telegram']['chat_id']
-        
+
     def send(self, bot_message):
         send_text = f'https://api.telegram.org/bot{self.bot_token}/sendMessage?chat_id={self.chat_id}&parse_mode=Markdown&text={bot_message}'
         response = requests.get(send_text)
@@ -36,7 +36,7 @@ class scrapping():
 
     def GetHTMLSession(self, url:str):
         return HTMLSession().get(url)
-    
+
     def GetHTMLRended(self, url:str, timeout:int = 60):
         var = self.GetHTMLSession(url)
         var.html.render(timeout=timeout)
@@ -79,7 +79,7 @@ class scrapping():
         self.AK47    = AK47
         self.M4A4    = M4A4
         self.AWP     = AWP
-            
+
     def SendTLOfProductsAvailable(self, data:list = None):
         if data is None: data = self.SKINS
         for product in data:
@@ -92,7 +92,7 @@ Quantity: {product['quantity']}
 Cost: {product['cost']}
 """)
                 if not status: print("MSG Não enviada")
-            
+
 
 if __name__ == "__main__":
 
