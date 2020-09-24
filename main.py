@@ -98,16 +98,20 @@ if __name__ == "__main__":
 
     scrap = scrapping(args.channel)
     while True:
-        print(f'Running in CHANNEL: {args.channel}, alerting {args.type}, with INTERVAL: {args.interval} seconds')
-        scrap.GetListOfProducts()
-        scrap.SepareProductsInGroups()
-        if args.type == 'skins': scrap.SendTLOfProductsAvailable()
-        elif args.type == 'ak47': scrap.SendTLOfProductsAvailable(scrap.AK47)
-        elif args.type == 'ma4a': scrap.SendTLOfProductsAvailable(scrap.M4A4)
-        elif args.type == 'knifes': scrap.SendTLOfProductsAvailable(scrap.KNIFES)
-        elif args.type == 'awp': scrap.SendTLOfProductsAvailable(scrap.AWP)
-        elif args.type == 'all': scrap.SendTLOfProductsAvailable(scrap.PRODUCS_LIST_DICT)
-        else:
-            print(f"ERROR: Type invalid: {args.type} doesnt exist!, use one of [skins, ak47, m4a4, knife, awp, all]!")
-            sys.exit(1)
+        print(f"\nRunning in CHANNEL: {args.channel}, alerting {args.type}, with INTERVAL: {args.interval} seconds")
+        try:
+            scrap.GetListOfProducts()
+            scrap.SepareProductsInGroups()
+            if args.type == 'skins': scrap.SendTLOfProductsAvailable()
+            elif args.type == 'ak47': scrap.SendTLOfProductsAvailable(scrap.AK47)
+            elif args.type == 'ma4a': scrap.SendTLOfProductsAvailable(scrap.M4A4)
+            elif args.type == 'knifes': scrap.SendTLOfProductsAvailable(scrap.KNIFES)
+            elif args.type == 'awp': scrap.SendTLOfProductsAvailable(scrap.AWP)
+            elif args.type == 'all': scrap.SendTLOfProductsAvailable(scrap.PRODUCS_LIST_DICT)
+            else:
+                print(f"ERROR: Type invalid: {args.type} doesnt exist!, use one of [skins, ak47, m4a4, knife, awp, all]!")
+                sys.exit(1)
+        except expression as err:
+            print(f"ERROR: {err}\n")
+            pass
         sleep(args.interval-5)
