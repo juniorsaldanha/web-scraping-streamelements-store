@@ -1,7 +1,5 @@
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
-
-
 from time import sleep
 import json, os, argparse, requests, sys
 
@@ -13,7 +11,7 @@ parser.add_argument("--type", "-t", help="Category/Type of item to alert in Tele
 args = parser.parse_args()
 
 class telegram():
-    def __init__(self, PATH:str = '.'):
+    def __init__(self,):
         try:
             self.telegramConf = json.load(open(os.path.dirname(os.path.abspath(__file__))+'/telegram.json'))
         except:
@@ -82,20 +80,18 @@ class scrapping():
 
     def SendTLOfProductsAvailable(self, data:list = None):
         if data is None: data = self.SKINS
+        status = bool
         for product in data:
             if product['quantity'] > 0:
                 status = self.TELEGRAM.send(
-f"""
-ITEM DISPONIVEL:
+f"""ITEM DISPONIVEL:
 Product: {product['product']}
 Quantity: {product['quantity']}
-Cost: {product['cost']}
-""")
-                if not status: print("MSG Não enviada")
-
+Cost: {product['cost']}""")
+                if not status: print("MSG Não enviada!")
+        if status: print(f"{len(data)} itens enviados!")
 
 if __name__ == "__main__":
-
     scrap = scrapping(args.channel)
     while True:
         print(f"\nRunning in CHANNEL: {args.channel}, alerting {args.type}, with INTERVAL: {args.interval} seconds")
@@ -114,4 +110,4 @@ if __name__ == "__main__":
         except expression as err:
             print(f"ERROR: {err}\n")
             pass
-        sleep(args.interval-5)
+        sleep(args.interval)
