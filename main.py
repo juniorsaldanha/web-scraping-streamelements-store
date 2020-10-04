@@ -107,7 +107,7 @@ if __name__ == "__main__":
             else:
                 print(f"ERROR: Type invalid: {args.type} doesnt exist!, use one of [skins, ak47, m4a4, knife, awp, all]!")
                 sys.exit(1)
-        except expression as err:
+        except Exception as err:
             print(f"ERROR: {err}\n")
             pass
         sleep(args.interval)
