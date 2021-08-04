@@ -1,6 +1,0 @@
-{
-    "telegram":{
-        "token" : "token_of_your_Bot,_if_u_doesnt_have_a_bot_in_telegra,_create_one",
-        "chat_id" : "get_chat_id,_search_in_Google_to_see_how_to_do_it"
-    }
-}

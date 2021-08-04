@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  webscrapingstreamelementsstore:
+    image: webscrapingstreamelementsstore
+    build:
+      context: .
+      dockerfile: ./Dockerfile
