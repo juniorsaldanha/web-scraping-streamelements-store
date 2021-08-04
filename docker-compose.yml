@@ -6,3 +6,5 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    volumes:
+      - appsettings.json:/app/appsettings.json
