@@ -5,7 +5,7 @@ class StreamElements(object):
     def __init__(self, config:str) -> None:
         super().__init__()
         self.config = config
-        self.channel = config["CHANNEL"]
+        self.channel = self.config["CHANNEL"]
         
     
     def __setup_chromedriver(self,):
