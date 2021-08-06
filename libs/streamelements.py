@@ -62,6 +62,8 @@ class StreamElements(object):
         Allitems = self.__parseStoreItems(self.__getPublicStoreItems())
         filtedByStrings = []
         filtedByAvailable = []
+
+        # Fazer list comprehension nos 2 for abaixo
         for item in Allitems:
             if not any(map(item["play_arrow"].__contains__, self.config["STRINGS_TO_REMOVE_ITEMS"])): filtedByStrings.append(item)
         if not onlyAvailable: return filtedByStrings
