@@ -2,9 +2,8 @@ version: '3.4'
 
 services:
   webscrapingstreamelementsstore:
-    image: webscrapingstreamelementsstore
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    container_name: webscrapingstreamelementsstore
+    image: umsaldanha/web-scraping-streamelements-store:latest
+    restart: always
     volumes:
-      - appsettings.json:/app/appsettings.json
+      - appsettings_model.json:/app/appsettings.json
