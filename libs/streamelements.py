@@ -6,7 +6,7 @@ class StreamElements(object):
         super().__init__()
         self.config = config
         self.channel = config["CHANNEL"]
-        self.__setup_chromedriver()
+        
     
     def __setup_chromedriver(self,):
         chrome_options = webdriver.ChromeOptions()
@@ -19,6 +19,7 @@ class StreamElements(object):
         self.driver = webdriver.Chrome("chromedriver", options=chrome_options, )
 
     def __getPublicStoreItems(self,):
+        self.__setup_chromedriver()
         self.driver.get(f"https://streamelements.com/{self.channel}/store")
         self.driver.implicitly_wait(8)
         public_store_items = self.driver.find_elements_by_tag_name('md-card')
@@ -67,4 +68,6 @@ class StreamElements(object):
         for item in filtedByStrings:
             if onlyAvailable and item["shopping_basket"] != "Sold out":
                 filtedByAvailable.append(item)
+        self.driver.quit()
+        self.driver = None
         return filtedByAvailable
