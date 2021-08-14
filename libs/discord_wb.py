@@ -25,8 +25,8 @@ class Discord(object):
         newPost.add_embed_field(name="Item", value=item['play_arrow'])
         newPost.add_embed_field(name="Quantity", value=item['shopping_basket'])
         newPost.add_embed_field(name="Value", value=item['monetization_on'], )
-        if "|" in item['play_arrow'] and os.path.isfile(f"{item['play_arrow']}.jpg"):
-            with open(f"{item['play_arrow']}.jpg", "rb") as f:
+        if os.path.isfile(f"{str(item['play_arrow']).strip().lower()}.jpg"):
+            with open(f"{str(item['play_arrow']).strip().lower()}.jpg", "rb") as f:
                 self.client.add_file(file=f.read(), filename=f"{item['play_arrow']}.jpg")
         newPost.set_footer(text="Go get if u liked. 🤖")
         newPost.set_timestamp()
@@ -40,8 +40,8 @@ class Discord(object):
         for item in items:
                 self.__print_item(item)
                 self.createPost(item)
-                self.__remove_all_images()
-                sleep(5)
+                self.__remove_image(item['play_arrow'])
+                sleep(3)
 
     def __print_item(self, item:dict):
         print(
@@ -51,6 +51,9 @@ Item: {item['play_arrow']}
 \tValue: {item['monetization_on']}\n
 """
         )
+
+    def __remove_image(self, file:str):
+        if os.path.isfile(f"{file.strip().lower()}.jpg"): os.remove(f"{file.strip().lower()}.jpg")
 
     def __remove_all_images(self):
         for item in os.listdir("./"):

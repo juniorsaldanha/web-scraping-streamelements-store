@@ -1,5 +1,7 @@
 import os
+from time import sleep, time
 from selenium import webdriver
+import requests
 
 class StreamElements(object):
     def __init__(self, config:str) -> None:
@@ -23,7 +25,6 @@ class StreamElements(object):
         self.driver.get(f"https://streamelements.com/{self.channel}/store")
         self.driver.implicitly_wait(8)
         public_store_items = self.driver.find_elements_by_tag_name('md-card')
-
         return public_store_items
     
     def __remove_all_images(self):
@@ -35,28 +36,41 @@ class StreamElements(object):
         self.__remove_all_images()
         while len(public_store_items) == 0: public_store_items = self.__getPublicStoreItems()
         allItems = []
-        for item in public_store_items[1:]:
-            newItem = {}
+
+        for item in public_store_items:
             try:
+                newItem = {}
                 strItem = str(item.text).split("\n")
+                if strItem[0] == "play_arrow": strItem.pop(0)
                 newItem["play_arrow"] = strItem[0]
-                if strItem[0] != "play_arrow":
-                    for key in range(1, len(strItem), 2):
-                        if key < len(strItem)-1:
-                            tag = strItem[key]
-                            value = strItem[key+1]
-                            newItem[tag] = value
-                if "|" in newItem["play_arrow"]:
-                    self.__screenshotItem(item, newItem["play_arrow"])
-                allItems.append(newItem)
+                for key in range(1, len(strItem), 2):
+                    if key < len(strItem)-1:
+                        tag = strItem[key]
+                        value = strItem[key+1]
+                        newItem[tag] = value
+
+                self.__screenshotItem(item, newItem["play_arrow"])
+                if "shopping_basket" in newItem.keys():
+                    for word in newItem["shopping_basket"].split(" "):
+                        try:
+                            if isinstance(int(word), int):
+                                newItem["shopping_basket"] = newItem["shopping_basket"].split(" ")[0]
+                                ...
+                        except ValueError: ...
+                    allItems.append(newItem)
             except Exception as err:
                 print(err)
                 ...
         return allItems
 
     def __screenshotItem(self, element, elementName:str):
-        if os.path.isfile(f"{elementName}.jpg"): os.remove(f"{elementName}.jpg")
-        element.screenshot(f"{elementName}.jpg")
+        if os.path.isfile(f"{elementName.strip().lower()}.jpg"): os.remove(f"{elementName.strip().lower()}.jpg")
+        src_img = element.find_element_by_tag_name('img').get_attribute("src")
+        response = requests.get(src_img)
+        if response.status_code == 200:
+            with open(f"{elementName.strip().lower()}.jpg", 'wb') as f:
+                f.write(response.content)
+        return
 
     def run(self, onlyAvailable:bool = True, ):
         Allitems = self.__parseStoreItems(self.__getPublicStoreItems())
