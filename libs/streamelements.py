@@ -1,89 +1,110 @@
 import os
-from time import sleep, time
-from selenium import webdriver
 import requests
+from pydantic import BaseModel
+from typing import List, Optional
+
+
+class Product(BaseModel):
+    id: str
+    name: str
+    description: str
+    cost: int
+    quantity: int
+    thumbnail: str
+    categoryName: Optional[str]
+
 
 class StreamElements(object):
-    def __init__(self, config:str) -> None:
+    def __init__(self, config: str) -> None:
         super().__init__()
         self.config = config
         self.channel = self.config["CHANNEL"]
-        
-    
-    def __setup_chromedriver(self,):
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--silent")
-        chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--whitelisted-ips")
-        self.driver = webdriver.Chrome("chromedriver", options=chrome_options, )
+        self.filters = self.config["STRINGS_TO_REMOVE_ITEMS"]
 
-    def __getPublicStoreItems(self,):
-        self.__setup_chromedriver()
-        self.driver.get(f"https://streamelements.com/{self.channel}/store")
-        self.driver.implicitly_wait(8)
-        public_store_items = self.driver.find_elements_by_tag_name('md-card')
-        return public_store_items
-    
+    def execute(self,):
+        self.__getIdChannel(self.channel)
+        return self.__getItems()
+
+    def __getIdChannel(self, channel):  # sourcery skip: raise-specific-error
+        url = f"https://api.streamelements.com/kappa/v2/channels/{channel}"
+
+        payload = ""
+        headers = {
+            "authority": "api.streamelements.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "cache-control": "no-cache",
+            "origin": "https://streamelements.com",
+            "pragma": "no-cache",
+            "referer": "https://streamelements.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36"
+        }
+
+        response = requests.request(
+            "GET", url, data=payload, headers=headers).json()
+        if "statusCode" in response.keys():
+            raise Exception(response)
+        self.channel_id = response["_id"]
+
+    def __getItems(self,):
+        public_store_items = []
+
+        url = "https://api.streamelements.com/kappa/v2/store/5cc799026e852d26fcf16717/items"
+
+        querystring = {"source": "website"}
+
+        payload = ""
+        headers = {
+            "authority": "api.streamelements.com",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "cache-control": "no-cache",
+            "origin": "https://streamelements.com",
+            "pragma": "no-cache",
+            "referer": "https://streamelements.com/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36"
+        }
+
+        response = requests.request(
+            "GET", url, data=payload, headers=headers, params=querystring)
+        for product in response.json():
+            if product["enabled"] and product["quantity"]["current"] > 0:
+                product["quantity"] = product["quantity"]["current"]
+                product["id"] = product["_id"]
+                if "thumbnail" not in product.keys():
+                    product["thumbnail"] = product["alert"]["graphics"]["src"]
+                public_store_items.append(Product(**product))
+        public_filtered = self.__filter_items(public_store_items, self.filters)
+        for item in public_filtered:
+            self.__download_images(item)
+        return public_filtered
+
+    def __filter_items(self, items: List[Product], filters: List[str]):
+        for filter in filters:
+            items = [item for item in items if filter not in item.name]
+        return items
+
     def __remove_all_images(self):
         for item in os.listdir("./"):
             if item.endswith(".jpg"):
                 os.remove(item)
 
-    def __parseStoreItems(self, public_store_items):
-        self.__remove_all_images()
-        while len(public_store_items) == 0: public_store_items = self.__getPublicStoreItems()
-        allItems = []
-
-        for item in public_store_items:
-            try:
-                newItem = {}
-                strItem = str(item.text).split("\n")
-                if strItem[0] == "play_arrow": strItem.pop(0)
-                newItem["play_arrow"] = strItem[0]
-                for key in range(1, len(strItem), 2):
-                    if key < len(strItem)-1:
-                        tag = strItem[key]
-                        value = strItem[key+1]
-                        newItem[tag] = value
-
-                self.__screenshotItem(item, newItem["play_arrow"])
-                if "shopping_basket" in newItem.keys():
-                    for word in newItem["shopping_basket"].split(" "):
-                        try:
-                            if isinstance(int(word), int):
-                                newItem["shopping_basket"] = newItem["shopping_basket"].split(" ")[0]
-                                ...
-                        except ValueError: ...
-                    allItems.append(newItem)
-            except Exception as err:
-                print(err)
-                ...
-        return allItems
-
-    def __screenshotItem(self, element, elementName:str):
-        if os.path.isfile(f"{elementName.strip().lower()}.jpg"): os.remove(f"{elementName.strip().lower()}.jpg")
-        src_img = element.find_element_by_tag_name('img').get_attribute("src")
-        response = requests.get(src_img)
+    def __download_images(self, product: Product, path: str = "./images"):
+        if not os.path.isdir('./images'):
+            os.mkdir(path)
+        if not path.endswith("/"):
+            path += "/"
+        if os.path.isfile(f"{path}{product.id}.jpg"):
+            os.remove(f"{path}{product.id}.jpg")
+        response = requests.get(product.thumbnail)
         if response.status_code == 200:
-            with open(f"{elementName.strip().lower()}.jpg", 'wb') as f:
+            with open(f"{path}{product.id}.jpg", 'wb') as f:
                 f.write(response.content)
-        return
-
-    def run(self, onlyAvailable:bool = True, ):
-        Allitems = self.__parseStoreItems(self.__getPublicStoreItems())
-        filtedByStrings = []
-        filtedByAvailable = []
-
-        # Fazer list comprehension nos 2 for abaixo
-        for item in Allitems:
-            if not any(map(item["play_arrow"].__contains__, self.config["STRINGS_TO_REMOVE_ITEMS"])): filtedByStrings.append(item)
-        if not onlyAvailable: return filtedByStrings
-        for item in filtedByStrings:
-            if onlyAvailable and item["shopping_basket"] != "Sold out":
-                filtedByAvailable.append(item)
-        self.driver.quit()
-        self.driver = None
-        return filtedByAvailable

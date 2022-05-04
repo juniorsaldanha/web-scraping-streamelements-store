@@ -10,8 +10,9 @@ if __name__ == "__main__":
     stream = StreamElements(config=config.App["STREAMELEMENTS"])
 
     while True:
-        Items = stream.run()
-        if len(Items) > 0:
-            discord.createPosts(items=Items)
-        print(f"{datetime.now().isoformat()} | {len(Items)} ITEM(S) DISPONIVEL(EIS) NA LOJA DO {config.App['STREAMELEMENTS']['CHANNEL'].upper()}")
+        items = stream.execute()
+        if items:
+            discord.createPosts(items=items)
+        print(
+            f"{datetime.now().isoformat()} | {len(items)} ITEM(S) DISPONIVEL(EIS) NA LOJA DO {config.App['STREAMELEMENTS']['CHANNEL'].upper()}")
         sleep(config.App["STREAMELEMENTS"]["INTERVAL"]*60)
