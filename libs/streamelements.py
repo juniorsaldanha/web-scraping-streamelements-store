@@ -19,6 +19,7 @@ class StreamElements(object):
         super().__init__()
         self.config = config
         self.channel = self.config["CHANNEL"]
+        self.channel_id = ""
         self.filters = self.config["STRINGS_TO_REMOVE_ITEMS"]
 
     def execute(self,):
@@ -52,8 +53,8 @@ class StreamElements(object):
 
     def __getItems(self,):
         public_store_items = []
-
-        url = "https://api.streamelements.com/kappa/v2/store/5cc799026e852d26fcf16717/items"
+        if self.channel_id == "": return
+        url = f"https://api.streamelements.com/kappa/v2/store/{self.channel_id}/items"
 
         querystring = {"source": "website"}
 
@@ -76,8 +77,10 @@ class StreamElements(object):
         response = requests.request(
             "GET", url, data=payload, headers=headers, params=querystring)
         for product in response.json():
-            if product["enabled"] and product["quantity"]["current"] > 0:
-                product["quantity"] = product["quantity"]["current"]
+            if product["enabled"]:
+                if "current" in product["quantity"].keys() and product["quantity"]["current"] > 0:
+                    product["quantity"] = product["quantity"]["current"]
+                else: product["quantity"] = -1
                 product["id"] = product["_id"]
                 if "thumbnail" not in product.keys():
                     product["thumbnail"] = product["alert"]["graphics"]["src"]
